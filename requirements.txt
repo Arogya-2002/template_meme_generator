@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+torch
+transformers
+facenet-pytorch
+pillow
+numpy
+python-multipart
+google-generativeai
+Pillow
