@@ -1,157 +1,236 @@
-# 🎭 Emotion Detection API - FastAPI Based Face Emotion Recognizer
+# 🎭 Emotion-Based Meme Generator API
 
-This project is an **AI-based facial emotion detection API** built with **FastAPI**, leveraging **ViT (Vision Transformer)** from Hugging Face for emotion classification and **MTCNN** from `facenet-pytorch` for face detection.
+A FastAPI-powered intelligent meme generator that detects emotions from facial expressions and creates contextual memes with multilingual support.
 
-It follows a clean **OOP-based modular structure**, inspired by production-ready MLOps patterns — so it's scalable, testable, and easy to maintain.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
+## ✨ Features
 
-## 📸 What it Does
+- **Intelligent Face Detection**: Uses MTCNN for accurate face detection in images
+- **Emotion Classification**: Leverages Vision Transformer (ViT) for precise emotion recognition
+- **Dynamic Meme Generation**: Creates contextual memes based on detected emotions
+- **Multilingual Support**: Generates captions in Telugu and English
+- **RESTful API**: Easy-to-use FastAPI endpoints with automatic documentation
+- **File Upload Support**: Accepts JPG and PNG image formats
 
-- Upload any image (with one or more human faces)
-- Detect faces and extract bounding boxes
-- Predict emotion for each face using a transformer model
-- Return:
-  - face index
-  - bounding box
-  - emotion label
-  - emotion ID
-  - confidence score
-  - matching emoji 😄😢😠
+## 🏗️ Architecture
 
----
+### Core Technologies
+- **Face Detection**: `facenet-pytorch` (MTCNN)
+- **Emotion Classification**: `trpakov/vit-face-expression` (Vision Transformer)
+- **Image Processing**: Pillow with custom Telugu font support
+- **Backend Framework**: FastAPI with async support
 
-## 🧠 Behind the Scenes
+### Supported Emotions
+The model can detect and generate memes for the following emotions:
+- Happy 😊
+- Sad 😢
+- Angry 😠
+- Surprised 😲
+- Fear 😨
+- Disgust 🤢
+- Neutral 😐
 
-- **Face Detection:** MTCNN from `facenet-pytorch`
-- **Emotion Classification Model:** `trpakov/vit-face-expression` from Hugging Face
-- **Framework:** FastAPI
-- **Core Logic:** Modular OOP structure just like [BG_addAndRemove repo](https://github.com/Arogya-2002/BG_addAndRemove)
+## 📂 Project Structure
 
----
+```
+meme-generator-api/
+├── app.py                          # FastAPI application entry point
+├── requirements.txt                # Python dependencies
+├── README.md                       # Project documentation
+├── fonts/                          # Font assets
+│   └── NotoSansTelugu-Regular.ttf  # Telugu font file
+├── artifacts/                      # Generated artifacts
+│   └── data/                       # Cached images and temp files
+├── logs/                           # Application logs
+└── src/                            # Source code
+    ├── components/                 # Core components
+    │   ├── classify_emotion.py     # Emotion classification logic
+    │   ├── detect_face.py          # Face detection implementation
+    │   └── meme_generator.py       # Meme generation utilities
+    ├── pipeline/                   # Processing pipelines
+    │   ├── emotion_pipeline.py     # End-to-end emotion processing
+    │   └── template_meme_pipeline.py # Meme template processing
+    ├── entity/                     # Data models and configurations
+    │   ├── artifact.py             # Artifact definitions
+    │   └── config.py               # Configuration models
+    ├── constants/                  # Global constants
+    ├── exceptions/                 # Custom exception classes
+    ├── logger/                     # Logging configuration
+    └── utils/                      # Helper utilities
+```
 
-## 📁 Project Structure
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
+- Virtual environment (recommended)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/meme-generator-api.git
+   cd meme-generator-api
+   ```
+
+2. **Set up virtual environment**
+   ```bash
+   python -m venv venv
+   
+   # Windows
+   venv\Scripts\activate
+   
+   # macOS/Linux
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the application**
+   ```bash
+   uvicorn app:app --reload
+   ```
+
+5. **Access the API**
+   - **API Base URL**: http://127.0.0.1:8000
+   - **Interactive Documentation**: http://127.0.0.1:8000/docs
+   - **Alternative Docs**: http://127.0.0.1:8000/redoc
+
+## 📡 API Reference
+
+### Generate Meme Endpoint
+
+**Endpoint**: `POST /generate-meme/`
+
+**Description**: Upload an image to detect emotions and generate a contextual meme.
+
+**Request Format**:
+- **Content-Type**: `multipart/form-data`
+- **Parameter**: `image` (file) - JPG or PNG image file
+
+**Response**: 
+- **Content-Type**: `image/png`
+- **Body**: Generated meme image as downloadable file
+
+**Example Usage**:
 
 ```bash
-.
-├── app.py                          # FastAPI app entrypoint with routes
-├── requirements.txt               # All Python dependencies
-├── .gitignore                     # Ignoring env/cache/etc.
-├── README.md                      # This file 💁‍♂️
-└── src/
-    ├── components/                # Core logic modules
-    │   ├── detect_face.py         # Detect faces using MTCNN
-    │   ├── classify_emotion.py    # Predict emotions with ViT
-    │   └── process.py             # Full image processing pipeline
-    ├── entity/                    # Data models
-    │   ├── artifact.py            # Result structures (face index, label, etc.)
-    │   └── config.py              # Config for models and constants
-    ├── exceptions.py              # Custom error handling
-    ├── logger.py                  # Logging setup
-    └── utils.py                   # Utility functions like image loader
+# Using cURL
+curl -X POST "http://127.0.0.1:8000/generate-meme/" \
+  -F "image=@path/to/your/image.jpg" \
+  --output generated_meme.png
+
+# Using Python requests
+import requests
+
+with open('your_image.jpg', 'rb') as f:
+    response = requests.post(
+        'http://127.0.0.1:8000/generate-meme/',
+        files={'image': f}
+    )
+    
+with open('generated_meme.png', 'wb') as f:
+    f.write(response.content)
 ```
 
----
+**Status Codes**:
+- `200`: Meme generated successfully
+- `400`: Invalid image format or processing error
+- `422`: Validation error
+- `500`: Internal server error
 
-## 🔧 Setup Instructions
+## 🛠️ Configuration
 
-### 1. Clone the Repo
+### Font Configuration
+The application uses `NotoSansTelugu-Regular.ttf` for Telugu text rendering. Ensure the font file is present in the `fonts/` directory for proper multilingual support.
 
+### Environment Variables
+Create a `.env` file for configuration:
+```env
+# API Configuration
+HOST=127.0.0.1
+PORT=8000
+DEBUG=True
+
+# Model Configuration
+EMOTION_MODEL=trpakov/vit-face-expression
+CONFIDENCE_THRESHOLD=0.5
+
+# File Configuration
+MAX_FILE_SIZE=10485760  # 10MB
+ALLOWED_EXTENSIONS=jpg,jpeg,png
+```
+
+## 🧪 Testing
+
+Run the test suite:
 ```bash
-git clone https://github.com/your-username/emotion-detector-api.git
-cd emotion-detector-api
+pytest tests/ -v
 ```
 
-### 2. Create Virtual Environment (Optional but recommended)
-
+For coverage report:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+pytest --cov=src tests/
 ```
 
-### 3. Install Dependencies
+## 🐳 Docker Deployment
 
+Build and run with Docker:
 ```bash
-pip install -r requirements.txt
+# Build image
+docker build -t meme-generator-api .
+
+# Run container
+docker run -p 8000:8000 meme-generator-api
 ```
 
----
+## 🔮 Roadmap
 
-## 🚀 Running the Project
+- [ ] **Enhanced Multilingual Support**: Add support for more Indian languages
+- [ ] **Web Interface**: React-based frontend with drag-and-drop functionality
+- [ ] **Template System**: Predefined meme templates categorized by emotion
+- [ ] **Batch Processing**: Support for multiple image processing
+- [ ] **Cloud Storage**: Integration with AWS S3/Google Cloud Storage
+- [ ] **Performance Optimization**: Caching and async processing improvements
+- [ ] **Mobile App**: React Native companion app
+- [ ] **Social Sharing**: Direct integration with social media platforms
 
-### Start the FastAPI server
+## 🤝 Contributing
 
-```bash
-uvicorn app:app --reload
-```
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-- Visit `http://127.0.0.1:8000` to check if it’s up.
-- Docs available at `http://127.0.0.1:8000/docs`
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
----
+## 📝 License
 
-## 📡 API Endpoint
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### `/detect-emotions`
+## 🙏 Acknowledgments
 
-- **Method:** POST
-- **Payload:** Image file (form field name = `file`)
-- **Response:** List of detected faces and emotion predictions
+- **Hugging Face** for the pre-trained Vision Transformer model
+- **facenet-pytorch** team for the MTCNN implementation
+- **FastAPI** community for the excellent framework
+- Inspired by modular ML project architectures
 
-#### 🧪 Sample Request via cURL
+## 📞 Support
 
-```bash
-curl -X POST "http://127.0.0.1:8000/detect-emotions" \
-  -F "file=@your_image.jpg"
-```
-
-#### ✅ Example Response
-
-```json
-{
-  "faces": [
-    {
-      "face_index": 1,
-      "box": [45, 50, 160, 170],
-      "emotion_label": "happy",
-      "emotion_id": 3,
-      "confidence": 97.5,
-      "emoji": "😄"
-    }
-  ]
-}
-```
+- **Issues**: [GitHub Issues](https://github.com/your-username/meme-generator-api/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/meme-generator-api/discussions)
+- **Email**: your-email@example.com
 
 ---
 
-## 📦 Models & Libs Used
-
-| Component         | Tech                                |
-|------------------|--------------------------------------|
-| Face Detection    | `facenet-pytorch` (MTCNN)            |
-| Emotion Detection | `trpakov/vit-face-expression` (ViT) |
-| Web Framework     | `FastAPI`                           |
-| Image Processing  | `Pillow`, `torch`, `numpy`          |
-
----
-
-## 🧱 Next Steps / Ideas
-
-- Add frontend (Streamlit, Gradio, or HTML form)
-- Add emotion bar graph per face
-- Save logs or outputs to file
-- Dockerize the app
-- Deploy on Hugging Face Spaces or Render
-
----
-
-## 🙌 Credits
-
-Built by [Your Name]  
-OOP layout inspired by: [BG_addAndRemove GitHub Repo](https://github.com/Arogya-2002/BG_addAndRemove)
-
----
-
-## 📃 License
-
-MIT License — free to use and build on
+<div align="center">
+  <strong>Built with ❤️ for the meme community</strong>
+</div>
